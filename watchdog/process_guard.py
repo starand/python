@@ -29,6 +29,10 @@ class ProcessGuard(object):
         self.watchdog = watchdog
         self.subprocess = None
         self.setInitialState()
+	path = os.path.dirname(self.execFile)
+	print(path)
+	os.environ['LD_LIBRARY_PATH'] = path
+	
 
     def setInitialState(self):
         """
