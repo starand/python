@@ -1,5 +1,4 @@
-class logger(object):
-
+class Logger(object):
     def debug(self, message):
         print('[DBG] {0}'.format(message))
 
@@ -14,3 +13,5 @@ class logger(object):
 
     def fatal(self, message):
         print('[FATAL] {0}'.format(message))
+
+logger = Logger()

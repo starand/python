@@ -7,7 +7,7 @@ from daemon import Daemon
 from process_guard import ProcessGuard
 from config import cfg
 import wdutils
-import logger
+from logger import logger
 
 
 class WatchdogDaemon(Daemon):

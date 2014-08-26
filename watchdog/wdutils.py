@@ -1,6 +1,7 @@
 from subprocess import Popen, PIPE
 from os.path import dirname, abspath
-from pathwise import logger
+from logger import logger
+
 
 def callOutput(command):
     """

@@ -7,7 +7,7 @@ from signal import SIGKILL, SIGINT
 import wdutils
 from config import cfg
 
-import logger
+from logger import logger
 
 
 STATUS_STOPPED = 1
