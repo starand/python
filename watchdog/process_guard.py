@@ -29,6 +29,7 @@ class ProcessGuard(object):
         self.watchdog = watchdog
         self.subprocess = None
         self.setInitialState()
+	os.environ['LD_LIBRARY_PATH'] = os.path.dirname(self.execFile)
 
     def setInitialState(self):
         """
@@ -134,7 +135,7 @@ class ProcessGuard(object):
             logger.info('Stopping subprocess ({0})'.format(pid))
             try:
                 self.subprocess.terminate()
-                self.setState(STATUS_STOPPED)
+                #self.setState(STATUS_STOPPED)
                 wait_seconds = 0
                 while self.processIsRunning():
                     if wait_seconds == self.maxStopTimeout:
