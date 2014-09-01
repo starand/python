@@ -17,7 +17,8 @@ class WatchdogDaemon(Daemon):
         self.subprocessBinary = cfg.getOption('subprocess', 'binary')
         pidFileName = join(self.currentDir, cfg.getOption('watchdog', 'pidfile'))
 
-        Daemon.__init__(self, pidFileName)
+        scriptName = __file__
+        Daemon.__init__(self, pidFileName, scriptName)
         # Don't initialize logger here because it registers an atexit() handler
         # which interferes with the daemonization/forking process.
         # Namely, the atexit handler is called in both the parent and forked process
