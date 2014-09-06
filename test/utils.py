@@ -15,7 +15,7 @@ def send_string(socket, string):
             string = string.encode('utf-8')
     except:
         message = "Could not encode: {0}".format(''.join(":{0:02x}".format(ord(c)) for c in string))
-        logger.warning(message)
+        print(message)
     send_int(socket, len(string))
     socket.send(string)
 
