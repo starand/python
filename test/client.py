@@ -46,21 +46,5 @@ class TerminalsClient:
             self.send_thread = Thread(target=self.send_commands)
             self.send_thread.start()
 
-#client = TerminalsClient()
-#client.start()
-
-
-def has_colours(stream):
-    if not hasattr(stream, "isatty"):
-        return False
-    if not stream.isatty():
-        return False # auto color only on TTYs
-    try:
-        import curses
-        curses.setupterm()
-        return curses.tigetnum("colors") > 2
-    except:
-        # guess false in case of error
-        return False
-        
-print has_colours(sys.stdout)
+client = TerminalsClient()
+client.start()
