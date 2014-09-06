@@ -26,14 +26,15 @@ class TerminalsClient:
             
     def send_commands(self):
         while self.running:
-            line = raw_input('\033[92m#\033[0m ')
+            line = raw_input()
             send_string(self.socket, line)
 
     def recv_responses(self):
         while self.running:
             try:
                 reply = receive_string(self.socket)
-	        print(reply)
+                print(reply)
+                sys.stdout.write('# ')
             except socket.error as error:
                 print('Connection was dropped')
                 self.close_connection()
