@@ -7,12 +7,13 @@ class Daemon(object):
 
     Usage: subclass the Daemon class and override the run() method
     """
-    
-    def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+
+    def __init__(self, pidfile, scriptName, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = pidfile
+        self.scriptName = scriptName
 
     def daemonize(self):
         """
@@ -66,7 +67,7 @@ class Daemon(object):
         Start the daemon
         """
         # Check for a pidfile to see if the daemon already runs
-        if self.getPid():
+        if self.checkPid():
             message = "pidfile {0} already exist. Daemon already running?\n"
             sys.stderr.write(message.format(self.pidfile))
             sys.exit(1)
@@ -83,6 +84,19 @@ class Daemon(object):
         except IOError:
             pid = None
         return pid
+
+    def checkPid(self):
+        """
+        Check for the existence of a unix pid.
+        """
+        try:
+            pid = self.getPid()
+            args = open("/proc/{0}/cmdline".format(pid)).read().split('\x00')
+            if args[0] != 'python' or args[1] != self.scriptName:
+                return False
+        except IOError:
+            return False
+        return True
 
     def stop(self):
         """
