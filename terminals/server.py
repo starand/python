@@ -14,15 +14,12 @@ PORT = 2000
 def pipe_command(arg_list, standard_input=False):
     "arg_list is [command, arg1, ...], standard_input is string"
     pipe = subprocess.PIPE if standard_input else None
-    subp = subprocess.Popen(arg_list, stdin=pipe, stdout=subprocess.PIPE)
+    subp = subprocess.Popen(arg_list, shell=True, stdin=pipe, stdout=subprocess.PIPE)
     if not standard_input:
         return subp.communicate()[0]
     return subp.communicate(standard_input)[0]
 
 class SingleTCPHandler(SocketServer.BaseRequestHandler):
-    """
-    One instance per connection.  Override handle(self) to customize action.
-    """
     def handle(self):
         print('Client connected')
         # self.request is the client connection
@@ -33,7 +30,6 @@ class SingleTCPHandler(SocketServer.BaseRequestHandler):
             if reply is None:
                 print('Client disconnected')
                 break
-            print('Reply is : {0}'.format(reply))
             send_string(self.request, reply)
         self.request.close()
 
@@ -46,6 +42,7 @@ class SimpleServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
     def __init__(self, server_address, RequestHandlerClass):
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        print('Server started on port {0}'.format(server_address[1]))
 
 if __name__ == "__main__":
     server = SimpleServer((HOST, PORT), SingleTCPHandler)
