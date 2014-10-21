@@ -25,6 +25,7 @@ class ProcessGuard(object):
         self.exitErrorMessageFile = cfg.getOption('subprocess', 'exit_error_message_file')
         if self.exitErrorMessageFile and not os.path.isabs(self.exitErrorMessageFile):
             self.exitErrorMessageFile = os.path.join(wdutils.getScriptDir(), self.exitErrorMessageFile)
+        self.stderrFile = os.path.join(os.path.dirname(self.exitErrorMessageFile), cfg.getOption('subprocess', 'stderr_file'))
 
         self.watchdog = watchdog
         self.subprocess = None
@@ -61,19 +62,41 @@ class ProcessGuard(object):
         return self.subprocess is not None and self.subprocess.poll() is not None
 
     def getFailedMessage(self):
+        """
+        Check exit error message file, stdout file and exit code and compose failed message.
+        """
         errorMessage = ''
         try:
             with open(self.exitErrorMessageFile) as errorFile:
                 errorMessage = errorFile.read()
         except IOError:
             pass
-        return errorMessage
+        try:
+            with open(self.stderrFile) as stderrFile:
+                errorMessage += stderrFile.read()
+        except IOError:
+            pass
+        if len(errorMessage):
+                errorMessage += ' '
+        # add exit code inforamtion
+        if self.subprocess.returncode == -6:
+            errorMessage += "SIGABRT received"
+        elif self.subprocess.returncode == -9:
+            errorMessage += "SIGKILL received"
+        elif self.subprocess.returncode == -11:
+            errorMessage += "Segmentation fault"
+        else:
+            errorMessage += "exit code {0}".format(self.subprocess.returncode)
+        return errorMessage if errorMessage else 'Unexpected termination of {0}'.format(self.subprocessName)
 
-    def openErrorFile(self):
+    def openStderrFile(self):
+        """
+        Open file for subprocess.Popen stderr param.
+        """
         self.error_file = PIPE
         try:
-            if self.exitErrorMessageFile:
-                self.error_file =  open(self.exitErrorMessageFile, 'w')
+            if self.stderrFile:
+                self.error_file =  open(self.stderrFile, 'w')
         except IOError:
             pass
         return self.error_file
@@ -103,7 +126,7 @@ class ProcessGuard(object):
                 if self.execFile[-3:] == '.py':
                     command.insert(0, 'python')
                 logger.info('Starting {0}'.format(' '.join(command)))
-                self.subprocess = Popen(command, close_fds=True, stderr=self.openErrorFile())
+                self.subprocess = Popen(command, close_fds=True, stderr=self.openStderrFile())
                 self.setState(STATUS_RUNNING)
             except OSError as error:
                 logger.error('{0} (Error code: {1})'.format(error.strerror, error.errno))

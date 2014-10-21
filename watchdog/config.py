@@ -13,7 +13,8 @@ _defaults = {
         'binary' : '',
         'statefile' : 'state',
         'exit_error_message_file' : 'error_file',
-        'max_stop_timeout' : 10
+        'max_stop_timeout' : 10,
+        'stderr_file' : 'stderr_file'
     },
 
     'pg' : {
