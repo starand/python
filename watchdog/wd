@@ -1,6 +1,6 @@
 #!/bin/sh
 #export PYTHONPATH=
 
-#export LD_LIBRARY_PATH=../../cpp/dev/raspberry/smarty/bin
+#export LD_LIBRARY_PATH=../../smarty/bin
 
 python watchdog.py $1
