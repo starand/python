@@ -15,8 +15,8 @@ STATUS_RUNNING = 2
 
 
 class ProcessGuard(object):
-    def __init__(self, watchdog):
-        execFile = cfg.getOption('subprocess', 'binary')
+    def __init__(self, watchdog, config):
+        execFile = config["binary"]
         self.execFile = execFile if os.path.isabs(execFile) else os.path.join(wdutils.getScriptDir(), execFile)
         self.stateFile = watchdog.currentDir + cfg.getOption('subprocess', 'statefile')
         self.subprocessName = cfg.getOption('subprocess', 'name')
@@ -28,6 +28,7 @@ class ProcessGuard(object):
         self.stderrFile = os.path.join(os.path.dirname(self.exitErrorMessageFile), cfg.getOption('subprocess', 'stderr_file'))
 
         self.watchdog = watchdog
+        self.config = config
         self.subprocess = None
         self.setInitialState()
 	os.environ['LD_LIBRARY_PATH'] = os.path.dirname(self.execFile)
@@ -121,7 +122,7 @@ class ProcessGuard(object):
         result = True
         if not self.processIsRunning():
             try:
-                index = '--{0}-index'.format(self.watchdog.subprocessName)
+                index = '--{0}-index'.format(self.config["name"])
                 command = [self.execFile, '--exit-error-message-file', self.exitErrorMessageFile]
                 if self.execFile[-3:] == '.py':
                     command.insert(0, 'python')
@@ -177,7 +178,7 @@ class ProcessGuard(object):
     def checkSubprocessFailed(self):
         if self.processFailed():
             message = self.getFailedMessage()
-            logger.error('Process {0} failed : {1}'.format(self.watchdog.subprocessName, message))
+            logger.error('Process {0} failed : {1}'.format(self.config["name"], message))
 
     def trackProcess(self):
         """

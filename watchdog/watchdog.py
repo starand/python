@@ -11,10 +11,11 @@ from logger import logger
 
 
 class WatchdogDaemon(Daemon):
+    pgList = []
+    running = False
+
     def __init__(self):
         self.currentDir = wdutils.getScriptDir()
-        self.subprocessName = cfg.getOption('subprocess', 'name')
-        self.subprocessBinary = cfg.getOption('subprocess', 'binary')
         pidFileName = join(self.currentDir, cfg.getOption('watchdog', 'pidfile'))
 
         scriptName = __file__
@@ -31,19 +32,26 @@ class WatchdogDaemon(Daemon):
         #logger.initialize(self.config_file, '{0}_watchdog'.format(cfg.getOption('subprocess', 'name')), consoleSeverity=logger.SEVERITY_NONE)
         #logger.important.info("=== Start. Ver: " + version.ProductVersion + " Application path: " + join(self.currentDir+ path.basename(__file__)))
 
-        if not self.subprocessBinary:
-            logger.error("Subprocess binary was not set in watchdog.ini file")
-            sys.exit(-1)
+        # TODO: validate sp name & binary there
+        #if not self.subprocessBinary:
+            #logger.error("Subprocess binary was not set in watchdog.ini file")
+            #sys.exit(-1)
 
-        self.processGuard = ProcessGuard(self)
-        self.setSignalHandlers()
         self.running = True
-        self.processGuard.start()
+        # Start subprocesses
+        spList = cfg.getSubprocesses()
+        for sp in spList:
+            processGuard = ProcessGuard(self, sp)
+            processGuard.start()
+            self.pgList.append(processGuard)
+
+        self.setSignalHandlers()
 
         pause()
 
         self.running = False
-        self.processGuard.stop()
+        for pg in self.pgList:
+            pg.stop()
         #logger.important.info("=== Exit")
 
     def signalHandler(self, signum, frame):
